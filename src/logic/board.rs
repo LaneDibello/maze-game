@@ -1,6 +1,8 @@
 use super::tile::Tile;
 use rand::Rng;
 
+const PASSAGE_LENGTH: usize = 2;
+
 #[derive(Clone, PartialEq, Copy)]
 pub struct Coord {
     pub x: usize,
@@ -14,9 +16,6 @@ impl Coord {
             y,
         }
     }
-    fn area(&self) -> usize {
-        self.x * self.y
-    } 
 }
 
 pub struct Board {
@@ -36,14 +35,14 @@ impl Board {
             player_pos: Coord::new(0, 0),
             start_pos: Coord::new(0, 0),
             size: Coord::new(width, height),
-            data: vec![Tile::wall; area],
+            data: vec![Tile::Wall; area],
         }
     }
 
     pub fn get(&self, x: usize, y: usize) -> &Tile {
         match self.data.get(x + y * self.size.x) {
             Some(tile) => tile,
-            None => &Tile::wall
+            None => &Tile::Wall
         }
     }
 
@@ -51,14 +50,14 @@ impl Board {
         if (x >= self.size.x) || (y >= self.size.y) {
             return false;
         }
-        *self.get(x, y) == Tile::wall
+        *self.get(x, y) == Tile::Wall
     }
 
     pub fn is_empty(&self, x: usize, y: usize) -> bool {
         if (x >= self.size.x) || (y >= self.size.y) {
             return false;
         }
-        *self.get(x, y) == Tile::empty
+        *self.get(x, y) == Tile::Empty
     }
 
     pub fn set(&mut self, x: usize, y: usize, tile: Tile) {
@@ -72,22 +71,22 @@ impl Board {
 
     pub fn get_adjacent_walls(&self, x: usize, y: usize) -> Vec<Coord> {
         let mut walls = Vec::new();
-        if let Some(new_x) = x.checked_add(2) {
+        if let Some(new_x) = x.checked_add(PASSAGE_LENGTH) {
             if self.is_wall(new_x, y){
                 walls.push(Coord::new(new_x, y));
             }
         }
-        if let Some(new_x) = x.checked_sub(2) {
+        if let Some(new_x) = x.checked_sub(PASSAGE_LENGTH) {
             if self.is_wall(new_x, y) {
                 walls.push(Coord::new(new_x, y));
             }
         }
-        if let Some(new_y) = y.checked_add(2) {
+        if let Some(new_y) = y.checked_add(PASSAGE_LENGTH) {
             if self.is_wall(x, new_y) {
                 walls.push(Coord::new(x, new_y));
             }
         }
-        if let Some(new_y) = y.checked_sub(2) {
+        if let Some(new_y) = y.checked_sub(PASSAGE_LENGTH) {
             if self.is_wall(x, new_y) {
                 walls.push(Coord::new(x, new_y));
             }
@@ -98,22 +97,22 @@ impl Board {
 
     pub fn get_adjacent_empty(&self, x: usize, y: usize) -> Vec<Coord> {
         let mut empties = Vec::new();
-        if let Some(new_x) = x.checked_add(2) {
+        if let Some(new_x) = x.checked_add(PASSAGE_LENGTH) {
             if self.is_empty(new_x, y){
                 empties.push(Coord::new(new_x, y));
             }
         }
-        if let Some(new_x) = x.checked_sub(2) {
+        if let Some(new_x) = x.checked_sub(PASSAGE_LENGTH) {
             if self.is_empty(new_x, y) {
                 empties.push(Coord::new(new_x, y));
             }
         }
-        if let Some(new_y) = y.checked_add(2) {
+        if let Some(new_y) = y.checked_add(PASSAGE_LENGTH) {
             if self.is_empty(x, new_y) {
                 empties.push(Coord::new(x, new_y));
             }
         }
-        if let Some(new_y) = y.checked_sub(2) {
+        if let Some(new_y) = y.checked_sub(PASSAGE_LENGTH) {
             if self.is_empty(x, new_y) {
                 empties.push(Coord::new(x, new_y));
             }
@@ -153,22 +152,22 @@ impl Board {
         let dy: isize = (start.y as isize) - (end.y as isize);
         if dx == 0 {
             if dy < 0 {
-                self.set(start.x, start.y + 1, Tile::empty);
+                self.set(start.x, start.y + 1, Tile::Empty);
             }
             if dy > 0 {
-                self.set(start.x, start.y - 1, Tile::empty);
+                self.set(start.x, start.y - 1, Tile::Empty);
             }
         }
         else if dy == 0 {
             if dx < 0 {
-                self.set(start.x + 1, start.y, Tile::empty);
+                self.set(start.x + 1, start.y, Tile::Empty);
             }
             if dx > 0 {
-                self.set(start.x - 1, start.y, Tile::empty);
+                self.set(start.x - 1, start.y, Tile::Empty);
             }
         }
-        self.set(start.x, start.y, Tile::empty);
-        self.set(end.x, end.y, Tile::empty);
+        self.set(start.x, start.y, Tile::Empty);
+        self.set(end.x, end.y, Tile::Empty);
     }
 
     pub fn move_player_up(&mut self) {
@@ -179,10 +178,10 @@ impl Board {
 
         if new_y < self.size.y {
             let new_tile = self.get(self.player_pos.x, new_y).clone();
-            if new_tile == Tile::exit {
+            if new_tile == Tile::Exit {
                 self.game_done = true;
             }
-            if new_tile != Tile::wall {
+            if new_tile != Tile::Wall {
                 self.player_pos.y = new_y;
             }
         }
@@ -196,10 +195,10 @@ impl Board {
 
         if new_y < self.size.y {
             let new_tile = self.get(self.player_pos.x, new_y).clone();
-            if new_tile == Tile::exit {
+            if new_tile == Tile::Exit {
                 self.game_done = true;
             }
-            if new_tile != Tile::wall {
+            if new_tile != Tile::Wall {
                 self.player_pos.y = new_y;
             }
         }
@@ -213,10 +212,10 @@ impl Board {
 
         if new_x < self.size.x {
             let new_tile = self.get(new_x, self.player_pos.y).clone();
-            if new_tile == Tile::exit {
+            if new_tile == Tile::Exit {
                 self.game_done = true;
             }
-            if new_tile != Tile::wall {
+            if new_tile != Tile::Wall {
                 self.player_pos.x = new_x;
             }
         }
@@ -230,10 +229,10 @@ impl Board {
 
         if new_x < self.size.x {
             let new_tile = self.get(new_x, self.player_pos.y).clone();
-            if new_tile == Tile::exit {
+            if new_tile == Tile::Exit {
                 self.game_done = true;
             }
-            if new_tile != Tile::wall {
+            if new_tile != Tile::Wall {
                 self.player_pos.x = new_x;
             }
         }
@@ -246,9 +245,9 @@ impl Board {
             let mut row: String = String::new();
             for x in 0..self.size.x {
                 match self.get(x, y) {
-                    Tile::wall => row.push('█'),
-                    Tile::empty => row.push(' '),
-                    Tile::exit => row.push('x')
+                    Tile::Wall => row.push('█'),
+                    Tile::Empty => row.push(' '),
+                    Tile::Exit => row.push('x')
                 }
             }
             row.push('\n');
@@ -261,7 +260,7 @@ impl Board {
 
 pub fn generate_board(board: &mut Board) {
     
-    board.set(board.start_pos.x, board.start_pos.y, Tile::empty);
+    board.set(board.start_pos.x, board.start_pos.y, Tile::Empty);
 
     let mut walls: Vec<Coord>  = Vec::new();
 
@@ -284,5 +283,5 @@ pub fn generate_board(board: &mut Board) {
         }
     }
 
-    board.set(last_wall.x, last_wall.y, Tile::exit);
+    board.set(last_wall.x, last_wall.y, Tile::Exit);
 }

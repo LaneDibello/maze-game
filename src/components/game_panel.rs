@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 use crate::logic::{board::{generate_board, Board}, tile::Tile};
 
+const BOARD_WIDTH: usize = 31;
+const BOARD_HEIGHT: usize = 31;
+
 fn handle_key_down(event: KeyboardEvent, board: &mut Signal<Board>) {
      match event.key() {
         Key::ArrowUp => board.write().move_player_up(),
@@ -13,7 +16,7 @@ fn handle_key_down(event: KeyboardEvent, board: &mut Signal<Board>) {
 
 pub fn game_panel() -> Element {
     let mut board = use_signal( || {
-        let mut b = Board::new(51, 51);
+        let mut b = Board::new(BOARD_WIDTH, BOARD_HEIGHT);
         generate_board(&mut b);
         b
     });
@@ -24,6 +27,16 @@ pub fn game_panel() -> Element {
             tabindex: "0", 
             onkeydown: move |event| handle_key_down(event, &mut board),
             prevent_default: "onkeydown",
+            if board.read().game_done {
+                h2 {
+                    "You Win!"
+                }
+            }
+            else {
+                h2 {
+                    "Reach the Exit!"
+                }
+            }
             div {
                 class: "board",
                 for y in 0..board.read().size.y {
@@ -35,15 +48,18 @@ pub fn game_panel() -> Element {
                             }
                             else {
                                 match *board.read().get(x, y) {
-                                    Tile::empty => rsx!(div {class: "tile-empty"}),
-                                    Tile::wall => rsx!(div {class: "tile-wall"}),
-                                    Tile::exit => rsx!(div {class: "tile-exit"}),
+                                    Tile::Empty => rsx!(div {class: "tile-empty"}),
+                                    Tile::Wall => rsx!(div {class: "tile-wall"}),
+                                    Tile::Exit => rsx!(div {class: "tile-exit"}),
                                 }  
                             }
                              
                         }
                     }
                 }
+            },
+            p {
+                "Use Arrow keys to navigate the player (Red Square) about the maze, until you reach the exit (Green Square)"
             }
         }
     }
