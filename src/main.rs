@@ -7,8 +7,8 @@ use logic::board::{generate_board, Board};
 use crate::components::game_panel::game_panel;
 
 fn main() {
-    // let mut board = Board::new(50, 50);
-    // generate_board(&mut board);
+    let mut board = Board::new(50, 50);
+    generate_board(&mut board);
 
     // Init logger
     dioxus_logger::init(Level::INFO).expect("failed to init logger");

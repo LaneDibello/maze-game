@@ -2,9 +2,9 @@ use dioxus::prelude::*;
 
 use crate::logic::{board::{generate_board, Board}, tile::Tile};
 pub fn game_panel() -> Element {
-    let mut board = Board::new(50, 50);
+    let mut board = Board::new(51, 51);
     generate_board(&mut board);
-
+    
     rsx! {
         div {
             class: "panel",

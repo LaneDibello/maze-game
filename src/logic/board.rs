@@ -1,7 +1,7 @@
 use super::tile::Tile;
 use rand::Rng;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Copy)]
 pub struct Coord {
     pub x: usize,
     pub y: usize
@@ -72,22 +72,22 @@ impl Board {
 
     pub fn get_adjacent_walls(&self, x: usize, y: usize) -> Vec<Coord> {
         let mut walls = Vec::new();
-        if let Some(new_x) = x.checked_add(1) {
+        if let Some(new_x) = x.checked_add(2) {
             if self.is_wall(new_x, y){
                 walls.push(Coord::new(new_x, y));
             }
         }
-        if let Some(new_x) = x.checked_sub(1) {
+        if let Some(new_x) = x.checked_sub(2) {
             if self.is_wall(new_x, y) {
                 walls.push(Coord::new(new_x, y));
             }
         }
-        if let Some(new_y) = y.checked_add(1) {
+        if let Some(new_y) = y.checked_add(2) {
             if self.is_wall(x, new_y) {
                 walls.push(Coord::new(x, new_y));
             }
         }
-        if let Some(new_y) = y.checked_sub(1) {
+        if let Some(new_y) = y.checked_sub(2) {
             if self.is_wall(x, new_y) {
                 walls.push(Coord::new(x, new_y));
             }
@@ -98,22 +98,22 @@ impl Board {
 
     pub fn get_adjacent_empty(&self, x: usize, y: usize) -> Vec<Coord> {
         let mut empties = Vec::new();
-        if let Some(new_x) = x.checked_add(1) {
+        if let Some(new_x) = x.checked_add(2) {
             if self.is_empty(new_x, y){
                 empties.push(Coord::new(new_x, y));
             }
         }
-        if let Some(new_x) = x.checked_sub(1) {
+        if let Some(new_x) = x.checked_sub(2) {
             if self.is_empty(new_x, y) {
                 empties.push(Coord::new(new_x, y));
             }
         }
-        if let Some(new_y) = y.checked_add(1) {
+        if let Some(new_y) = y.checked_add(2) {
             if self.is_empty(x, new_y) {
                 empties.push(Coord::new(x, new_y));
             }
         }
-        if let Some(new_y) = y.checked_sub(1) {
+        if let Some(new_y) = y.checked_sub(2) {
             if self.is_empty(x, new_y) {
                 empties.push(Coord::new(x, new_y));
             }
@@ -122,61 +122,53 @@ impl Board {
         empties
     }
 
-    pub fn get_visited(&self, x: usize, y: usize, visited: &Vec<bool>) -> bool {
-        match visited.get(x + y * self.size.x) {
-            Some(b) => *b,
-            None => false
-        }
-    }
-    
-    pub fn get_adjacent_visited(&self, x: usize, y: usize, visited: &Vec<bool>) -> Vec<Coord> {
-        let mut tiles = Vec::new();
+    pub fn get_adjacent_connections(&self, x: usize, y: usize) -> Vec<Coord> {
+        let mut connections = Vec::new();
         if let Some(new_x) = x.checked_add(1) {
-            if self.get_visited(new_x, y, visited) {
-                tiles.push(Coord::new(new_x, y));
+            if self.is_empty(new_x, y){
+                connections.push(Coord::new(new_x, y));
             }
         }
         if let Some(new_x) = x.checked_sub(1) {
-            if self.get_visited(new_x, y, visited) {
-                tiles.push(Coord::new(new_x, y));
+            if self.is_empty(new_x, y) {
+                connections.push(Coord::new(new_x, y));
             }
         }
         if let Some(new_y) = y.checked_add(1) {
-            if self.get_visited(x, new_y, visited) {
-                tiles.push(Coord::new(x, new_y));
+            if self.is_empty(x, new_y) {
+                connections.push(Coord::new(x, new_y));
             }
         }
         if let Some(new_y) = y.checked_sub(1) {
-            if self.get_visited(x, new_y, visited) {
-                tiles.push(Coord::new(x, new_y));
+            if self.is_empty(x, new_y) {
+                connections.push(Coord::new(x, new_y));
             }
         }
-        tiles
+
+        connections
     }
 
-    pub fn get_adjacent_unvisited(&self, x: usize, y: usize, visited: &Vec<bool>) -> Vec<Coord> {
-        let mut tiles = Vec::new();
-        if let Some(new_x) = x.checked_add(1) {
-            if new_x < self.size.x && !self.get_visited(new_x, y, visited) {
-                tiles.push(Coord::new(new_x, y));
+    pub fn make_passage(&mut self, start: Coord, end: Coord) {
+        let dx: isize = (start.x as isize) - (end.x as isize);
+        let dy: isize = (start.y as isize) - (end.y as isize);
+        if dx == 0 {
+            if dy < 0 {
+                self.set(start.x, start.y + 1, Tile::empty);
+            }
+            if dy > 0 {
+                self.set(start.x, start.y - 1, Tile::empty);
             }
         }
-        if let Some(new_x) = x.checked_sub(1) {
-            if !self.get_visited(new_x, y, visited) {
-                tiles.push(Coord::new(new_x, y));
+        else if dy == 0 {
+            if dx < 0 {
+                self.set(start.x + 1, start.y, Tile::empty);
+            }
+            if dx > 0 {
+                self.set(start.x - 1, start.y, Tile::empty);
             }
         }
-        if let Some(new_y) = y.checked_add(1) {
-            if new_y < self.size.y &&!self.get_visited(x, new_y, visited) {
-                tiles.push(Coord::new(x, new_y));
-            }
-        }
-        if let Some(new_y) = y.checked_sub(1) {
-            if !self.get_visited(x, new_y, visited) {
-                tiles.push(Coord::new(x, new_y));
-            }
-        }
-        tiles
+        self.set(start.x, start.y, Tile::empty);
+        self.set(end.x, end.y, Tile::empty);
     }
 
     pub fn move_player_up(&mut self) {
@@ -247,6 +239,7 @@ impl Board {
         }
     }
 
+    // Used For debug purposes
     pub fn pretty_print(&self) -> String {
         let mut output: String = String::new();
         for y in 0..self.size.y {
@@ -267,35 +260,29 @@ impl Board {
 }
 
 pub fn generate_board(board: &mut Board) {
-    let mut visited = vec![false; board.size.area()];
     
     board.set(board.start_pos.x, board.start_pos.y, Tile::empty);
-    visited[board.start_pos.x + board.start_pos.y * board.size.x] = true;
 
     let mut walls: Vec<Coord>  = Vec::new();
 
     walls.append(&mut board.get_adjacent_walls(board.start_pos.x, board.start_pos.y));
     
-    println!("Generating Board!");
+    let mut last_wall = Coord::new(board.start_pos.x, board.start_pos.y);
 
-    // Refien this implementation for nicer mazes
-    // Consider a prim's algorythm varient where every other tile is considered a valid cell
-    // and the in between tiles are passage ways
     while walls.len() > 0 {
         let i = rand::thread_rng().gen_range(0..walls.len());
         let wall: Coord = walls.remove(i);
 
-        println!("{} walls remain", walls.len());
+        let cells = board.get_adjacent_empty(wall.x, wall.y);
 
-        if board.get_adjacent_visited(wall.x, wall.y, &visited).len() == 1 {
-            let unvisited = board.get_adjacent_unvisited(wall.x, wall.y, &visited);
-            let i = rand::thread_rng().gen_range(0..unvisited.len());
-            let cell = unvisited[i].clone();
-            board.set(wall.x, wall.y, Tile::empty);
-            visited[wall.x + wall.y * board.size.x] = true;
-            board.set(cell.x, cell.y, Tile::empty);
-            visited[cell.x + cell.y * board.size.x] = true;
-            walls.append(&mut board.get_adjacent_walls(cell.x, cell.y));
+        if (cells.len() > 0) && (board.get_adjacent_connections(wall.x, wall.y).len() < 1) {
+            let i = rand::thread_rng().gen_range(0..cells.len());
+            let cell = cells[i];
+            board.make_passage(cell, wall);
+            last_wall = wall;
+            walls.append(&mut board.get_adjacent_walls(wall.x, wall.y));
         }
     }
+
+    board.set(last_wall.x, last_wall.y, Tile::exit);
 }
