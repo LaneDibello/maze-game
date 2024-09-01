@@ -1,21 +1,28 @@
+use crate::logic::{
+    board::{generate_board, Board},
+    tile::Tile,
+};
 use dioxus::prelude::*;
-use crate::logic::{board::{generate_board, Board}, tile::Tile};
 
+// Game looks prettier with odd-numbered dimensions
 const BOARD_WIDTH: usize = 31;
 const BOARD_HEIGHT: usize = 31;
 
+/// Event handler for Arrow Keys
 fn handle_key_down(event: KeyboardEvent, board: &mut Signal<Board>) {
-     match event.key() {
+    match event.key() {
         Key::ArrowUp => board.write().move_player_up(),
         Key::ArrowDown => board.write().move_player_down(),
         Key::ArrowLeft => board.write().move_player_left(),
-        Key::ArrowRight=> board.write().move_player_right(),
-        _ => {} // Handle other keys if necessary
+        Key::ArrowRight => board.write().move_player_right(),
+        _ => {} // Place other keys here in the future
     }
 }
 
+/// Game Panel that the maze and other game elements appear on
+/// Manages UI state, and accepts inputs
 pub fn game_panel() -> Element {
-    let mut board = use_signal( || {
+    let mut board = use_signal(|| {
         let mut b = Board::new(BOARD_WIDTH, BOARD_HEIGHT);
         generate_board(&mut b);
         b
@@ -24,7 +31,7 @@ pub fn game_panel() -> Element {
     rsx! {
         div {
             class: "panel",
-            tabindex: "0", 
+            tabindex: "0",
             onkeydown: move |event| handle_key_down(event, &mut board),
             prevent_default: "onkeydown",
             if board.read().game_done {
@@ -51,9 +58,9 @@ pub fn game_panel() -> Element {
                                     Tile::Empty => rsx!(div {class: "tile-empty"}),
                                     Tile::Wall => rsx!(div {class: "tile-wall"}),
                                     Tile::Exit => rsx!(div {class: "tile-exit"}),
-                                }  
+                                }
                             }
-                             
+
                         }
                     }
                 }

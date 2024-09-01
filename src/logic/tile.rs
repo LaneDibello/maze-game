@@ -2,5 +2,5 @@
 pub enum Tile {
     Empty,
     Wall,
-    Exit
+    Exit,
 }

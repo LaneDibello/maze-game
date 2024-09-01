@@ -1,10 +1,10 @@
 mod components;
 mod logic;
 
+use crate::components::game_panel::game_panel;
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 use logic::board::{generate_board, Board};
-use crate::components::game_panel::game_panel;
 
 fn main() {
     let mut board = Board::new(50, 50);
