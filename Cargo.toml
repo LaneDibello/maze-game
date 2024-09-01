@@ -1,0 +1,17 @@
+[package]
+name = "maze-game"
+version = "0.1.0"
+authors = ["LaneDibello <lane.dibello@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+
+dioxus = { version = "0.5", features = ["web", "router"] }
+
+# Debug
+dioxus-logger = "0.5.1"
+dioxus-web = "0.5.6"
+rand = "0.8.5"
