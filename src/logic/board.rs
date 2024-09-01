@@ -20,8 +20,8 @@ impl Coord {
 }
 
 pub struct Board {
-    game_done: bool,
-    player_pos: Coord,
+    pub game_done: bool,
+    pub player_pos: Coord,
     start_pos: Coord,
     pub size: Coord,
     data: Vec<Tile>
