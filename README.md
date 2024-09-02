@@ -15,6 +15,10 @@ This aboslutely is not a comprehenive nor exemplary example of rust and/or disox
 
 ![Victory Screen](assets/maze_game2.png)
 
+## Demo
+
+[A short demonstration video of this project](https://www.youtube.com/watch?v=HYFAzgMTMEI)
+
 ## Development
 
 Run the following command in the root of the project to start the Dioxus dev server:
